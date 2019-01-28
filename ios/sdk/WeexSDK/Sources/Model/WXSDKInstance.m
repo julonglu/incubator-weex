@@ -218,10 +218,17 @@ typedef enum : NSUInteger {
 - (void)_checkPageName
 {
     if (nil == self.pageName || [self.pageName isEqualToString:@""]) {
-        self.pageName = [self.scriptURL isFileURL] ? self.scriptURL.path.lastPathComponent: self.scriptURL.absoluteString;
+        NSURLComponents *components = [[NSURLComponents alloc] initWithString:self.scriptURL.absoluteString];
+        [components.queryItems enumerateObjectsUsingBlock:^(NSURLQueryItem * _Nonnull obj, NSUInteger idx, BOOL * _Nonnull stop) {
+            if([obj.name isEqualToString:@"pageName"]){
+                self.pageName  = obj.value;
+            }
+            NSLog(@"%@=%@",obj.name,obj.value);
+        }];
+        //self.pageName = [self.scriptURL isFileURL] ? self.scriptURL.path.lastPathComponent: self.scriptURL.absoluteString;
     }
     if (nil == self.pageName || [self.pageName isEqualToString:@""]) {
-        self.pageName = NSStringFromClass(self.viewController.class)?:@"unkonwPageCauseUnsetNameAndUrlAndVc";
+        self.pageName = NSStringFromClass(self.viewController.class)?:@"unkonwPage";
     }
 }
 
@@ -890,12 +897,14 @@ typedef enum : NSUInteger {
 
 - (void)applicationWillResignActive:(NSNotification*)notification
 {
-    [self fireGlobalEvent:WX_APPLICATION_WILL_RESIGN_ACTIVE params:nil];
+    NSDictionary *params = @{@"pageName": self.pageName};
+    [self fireGlobalEvent:WX_APPLICATION_WILL_RESIGN_ACTIVE params:params];
 }
 
 - (void)applicationDidBecomeActive:(NSNotification*)notification
 {
-    [self fireGlobalEvent:WX_APPLICATION_DID_BECOME_ACTIVE params:nil];
+   NSDictionary *params = @{@"pageName": self.pageName};
+   [self fireGlobalEvent:WX_APPLICATION_DID_BECOME_ACTIVE params:params];
 }
 
 - (WXComponentManager *)componentManager
