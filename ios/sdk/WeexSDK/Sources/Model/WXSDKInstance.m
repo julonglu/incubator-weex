@@ -218,13 +218,18 @@ typedef enum : NSUInteger {
 - (void)_checkPageName
 {
     if (nil == self.pageName || [self.pageName isEqualToString:@""]) {
-        NSURLComponents *components = [[NSURLComponents alloc] initWithString:self.scriptURL.absoluteString];
-        [components.queryItems enumerateObjectsUsingBlock:^(NSURLQueryItem * _Nonnull obj, NSUInteger idx, BOOL * _Nonnull stop) {
-            if([obj.name isEqualToString:@"pageName"]){
-                self.pageName  = obj.value;
-            }
-            NSLog(@"%@=%@",obj.name,obj.value);
-        }];
+         NSString *urlString = self.scriptURL.absoluteString;
+        if([urlString hasPrefix:@"http://dotwe.org"] || [urlString hasPrefix:@"https://dotwe.org"]) {
+            self.pageName  = @"Weex Online Example";
+        }else{
+            NSURLComponents *components = [[NSURLComponents alloc] initWithString:urlString];
+            [components.queryItems enumerateObjectsUsingBlock:^(NSURLQueryItem * _Nonnull obj, NSUInteger idx, BOOL * _Nonnull stop) {
+                if([obj.name isEqualToString:@"pageName"]){
+                    self.pageName  = obj.value;
+                }
+                NSLog(@"%@=%@",obj.name,obj.value);
+            }];
+        } 
         //self.pageName = [self.scriptURL isFileURL] ? self.scriptURL.path.lastPathComponent: self.scriptURL.absoluteString;
     }
     if (nil == self.pageName || [self.pageName isEqualToString:@""]) {
